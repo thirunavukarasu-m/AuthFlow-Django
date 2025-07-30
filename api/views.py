@@ -1,10 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status, generics
 from django.contrib.auth.models import User
 from .models import Product
-from .serializers import UserSerializer, ProductSerializer
+from .serializers import UserSerializer, ProductSerializer, LoginSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -12,11 +12,12 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 
 # Signup
 class SignupView(APIView):
+    permission_classes = [AllowAny] 
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({'message': 'User created successfully'}, status=201)
+            return Response({"message": "User created successfully"}, status=201)
         return Response(serializer.errors, status=400)
 
 # Product Views
@@ -40,6 +41,7 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 # Login View
 class CustomLoginView(TokenObtainPairView):
+    serializer_class = LoginSerializer
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         return Response({
